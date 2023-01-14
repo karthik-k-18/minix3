@@ -126,6 +126,7 @@ int do_fork()
   /* Tell the tracer, if any, about the new child */
   if (rmc->mp_tracer != NO_TRACER)
 	sig_proc(rmc, SIGSTOP, TRUE /*trace*/, FALSE /* ksig */);
+  printf("PM: forked child %d", rmc->mp_pid);
 
   /* Do not reply until VFS is ready to process the fork
   * request
