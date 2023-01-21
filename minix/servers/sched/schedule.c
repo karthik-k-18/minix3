@@ -326,7 +326,7 @@ static int schedule_process(struct schedproc * rmp, unsigned flags)
 	}
 
 	if(is_system_proc(rmp)==0){
-		printf("PID %d swapped in", rmp->endpoint);
+		printf("PID %d swapped in\n", _ENDPOINT_P(rmp->endpoint));
 	}
 
 	return err;
