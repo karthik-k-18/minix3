@@ -325,6 +325,10 @@ static int schedule_process(struct schedproc * rmp, unsigned flags)
 		rmp->endpoint, err);
 	}
 
+	if(is_system_proc(rmp)==0){
+		print("PID %d swapped in", rmp->endpoint);
+	}
+
 	return err;
 }
 
