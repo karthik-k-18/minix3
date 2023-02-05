@@ -100,7 +100,7 @@ int do_noquantum(message *m_ptr)
 
 	rmp = &schedproc[proc_nr_n];
 	if (rmp->priority < MIN_USER_Q) {
-		rmp->priority += 1; /* lower priority */
+		rmp->priority -= 1; /* lower priority */
 	}
 
 	if ((rv = schedule_process_local(rmp)) != OK) {
@@ -325,10 +325,6 @@ static int schedule_process(struct schedproc * rmp, unsigned flags)
 		rmp->endpoint, err);
 	}
 
-	if(is_system_proc(rmp)==0){
-		printf("PID %d swapped in\n", _ENDPOINT_P(rmp->endpoint));
-	}
-
 	return err;
 }
 
@@ -361,7 +357,7 @@ static void balance_queues(minix_timer_t *tp)
 	for (proc_nr=0, rmp=schedproc; proc_nr < NR_PROCS; proc_nr++, rmp++) {
 		if (rmp->flags & IN_USE) {
 			if (rmp->priority > rmp->max_priority) {
-				rmp->priority -= 1; /* increase priority */
+				// rmp->priority -= 1; /* increase priority */
 				schedule_process_local(rmp);
 			}
 		}
