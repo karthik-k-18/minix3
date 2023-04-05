@@ -9,7 +9,6 @@
  *   do_lseek:  perform the LSEEK system call
  */
 
-#include <string.h>
 #include "fs.h"
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -27,6 +26,9 @@
 #include "vnode.h"
 #include "vmnt.h"
 #include "path.h"
+// Lab-10 Addition
+#define S_IFIMM (0110000 & S_IFMT)
+#include <string.h>
 
 static char mode_map[] = {R_BIT, W_BIT, R_BIT | W_BIT, 0};
 
@@ -111,20 +113,22 @@ int common_open(char path[PATH_MAX], int oflags, mode_t omode)
 	/* If O_CREATE is set, try to make the file. */
 	if (oflags & O_CREAT)
 	{
-		omode = I_REGULAR | (omode & ALLPERMS & fp->fp_umask);
+		omode = I_IMMEDIATE | (omode & ALLPERMS & fp->fp_umask);
 		vp = new_node(&resolve, oflags, omode);
 		r = err_code;
-		// -- I changed here
+
+		// -- Lab 10 Addition --
+		struct vmnt *v_mp;
 		if (r == OK)
 		{
 			exist = FALSE;
-			struct vmnt *vmpPath;
-			vmpPath = find_vmnt(vp->v_fs_e);
-			if (strcmp(vmpPath->m_mount_path, "/home") == 0)
-				printf("file created: %llu\n", vp->v_inode_nr);
-		} 
-		/* We just created the file */
-		  // -- Unitl here
+			v_mp = find_vmnt(vp->v_fs_e);
+			if (strcmp(v_mp->m_mount_path, "/home") == 0)
+			{
+				printf("Minix3: File Created: %llu\n", vp->v_inode_nr);
+			}
+		}
+		// -- Lab 10 Addition --
 		else if (r != EEXIST)
 		{ /* other error */
 			if (vp)
@@ -132,12 +136,10 @@ int common_open(char path[PATH_MAX], int oflags, mode_t omode)
 			unlock_filp(filp);
 			return (r);
 		}
-
 		else
 			exist = !(oflags & O_EXCL); /* file exists, if the O_EXCL
 						   flag is set this is an error */
 	}
-
 	else
 	{
 		/* Scan path name */
@@ -171,6 +173,8 @@ int common_open(char path[PATH_MAX], int oflags, mode_t omode)
 			switch (vp->v_mode & S_IFMT)
 			{
 			case S_IFREG:
+			case S_IFIMM: // -- Lab 10 Addition --
+
 				/* Truncate regular file if O_TRUNC. */
 				if (oflags & O_TRUNC)
 				{
